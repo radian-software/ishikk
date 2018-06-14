@@ -202,6 +202,24 @@ allowable width of the calendar."
   "Name of buffer used to display the calendar."
   :type 'string)
 
+(define-derived-mode ishikk-calendar-mode fundamental-mode "Ishikk"
+  "Major mode for the Ishikk calendar.")
+
+(define-key ishikk-calendar-mode-map (kbd "q") #'quit-window)
+
+(defcustom ishikk-num-days 7
+  "Number of days to display in the calendar."
+  :type 'integer)
+
+(defun ishikk ()
+  "Display the Ishikk calendar in a new buffer."
+  (interactive)
+  (when-let ((buf (get-buffer ishikk-calendar-buffer)))
+    (kill-buffer buf))
+  (with-current-buffer (get-buffer-create ishikk-calendar-buffer)
+    (ishikk-calendar-mode)
+    (pop-to-buffer (current-buffer))))
+
 ;;;; Closing remarks
 
 (provide 'ishikk)
