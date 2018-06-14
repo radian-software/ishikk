@@ -2,6 +2,7 @@
 
 import dateutil.parser
 import icalendar
+import json
 import os
 import sys
 
@@ -35,6 +36,24 @@ def read_vdir(vdir, from_date=None, to_date=None):
             die("could not read file {}: {}".format(repr(item), str(e)))
         except ValueError as e:
             die("malformed calendar file {}: {}".format(repr(item), str(e)))
+        for comp in cal.subcomponents:
+            if not isinstance(comp, icalendar.Event):
+                continue
+            start_time = comp["dtstart"].dt
+            end_time = comp["dtend"].dt
+            if from_date and end_time < from_date:
+                continue
+            if to_date and start_time > to_date:
+                continue
+            event = {
+                "summary": comp["summary"],
+                "start-time": start_time.isoformat(),
+                "end-time": end_time.isoformat(),
+            }
+            events.append(event)
+    json.dump(events, sys.stdout, indent=2)
+    print()
+    sys.exit(0)
 
 def main(args):
     if not args:
