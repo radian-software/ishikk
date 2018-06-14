@@ -94,6 +94,8 @@ def main(args):
             args = args[1:]
             continue
         die_with_usage()
+    if vdir is None:
+        die_with_usage()
     read_vdir(vdir, from_date=from_date, to_date=to_date)
 
 if __name__ == "__main__":
