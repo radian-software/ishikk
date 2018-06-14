@@ -151,6 +151,57 @@ returned."
        "Failed to decode JSON from backend; see buffer %S for details"
        ishikk-process-buffer)))))
 
+(defcustom ishikk-minutes-per-line 15
+  "Number of minutes per line of text in the calendar.
+Increasing this value will compress the calendar vertically."
+  :type 'number)
+
+(defun ishikk--event-row (event)
+  "Get the vertical position of EVENT in the calendar buffer.
+This is a line number that can be used by e.g. `goto-line'."
+  (let* ((start-time (alist-get 'start-time event))
+         (start-comps (decode-time start-time))
+         (start-minutes (+ (/ (nth 0 start-comps) 60.0)
+                           (nth 1 start-comps)
+                           (* (nth 2 start-comps) 60))))
+    (floor start-minutes ishikk-minutes-per-line)))
+
+(defun ishikk--event-column (event start-day col-width)
+  "Get the horizontal position of EVENT in the calendar buffer.
+This is a column number that can be used by e.g. `move-to-column'.
+
+START-DAY is a time marking the beginning of the first day
+displayed in the calendar, and COL-WIDTH is the width of a day
+column."
+  (let* ((start-time (alist-get 'start-time event))
+         (col-index (- (time-to-days start-time)
+                       (time-to-days start-day))))
+    (1+ (* col-index (1+ col-width)))))
+
+(defun ishikk--insert-calendar (events start-day end-day width)
+  "Render a calendar displaying given EVENTS list into the current buffer.
+START-DAY and END-DAY are inclusive-exclusive bounds on which
+days are included in the calendar view; they should be times from
+the beginning of the relevant days. WIDTH is the maximum
+allowable width of the calendar."
+  (erase-buffer)
+  (let ((num-days (- (time-to-days end-day)
+                     (time-to-days start-day))))
+    (unless (>= num-days 1)
+      (user-error "Calendar date range does not include at least one day"))
+    (let* ((col-width (1- (/ (1- width) num-days)))
+           (height (ceiling (* 24 60) ishikk-minutes-per-line))
+           (col-template (make-string col-width ? )))
+      (dotimes (_ height)
+        (insert "|")
+        (dotimes (_ num-days)
+          (insert col-template "|"))
+        (insert "\n")))))
+
+(defcustom ishikk-calendar-buffer "*ishikk-calendar*"
+  "Name of buffer used to display the calendar."
+  :type 'string)
+
 ;;;; Closing remarks
 
 (provide 'ishikk)
