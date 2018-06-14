@@ -119,32 +119,37 @@ The virtualenv is created in `ishikk-virtualenv-location'."
   (unless (file-executable-p (ishikk--virtualenv-python))
     (ishikk-virtualenv-setup)))
 
-(cl-defun ishikk-read-events (vdir &optional &keyword start-date end-date)
+(cl-defun ishikk--read-events (vdir &optional &keyword start-date end-date)
+  "Read the calendar events from a VDIR directory.
+Return a list of alists. START-DATE and END-DATE keyword
+arguments, if provided, are date strings that limit the results
+returned."
   (unless (file-directory-p vdir)
     (user-error "Calendar directory does not exist: %S" vdir))
   (ishikk--with-process-buffer
-    (unless
-        (apply #'ishikk--call-process-and-insert
-               `(,(ishikk--virtualenv-python) "-m" "ishikk" "read"
-                 ,@(when start-date
-                     `("--start-date" ,start-date))
-                 ,@(when end-date
-                     `("--end-date" ,end-date))
-                 ,vdir))
+   (unless
+       (apply #'ishikk--call-process-and-insert
+              `(,(ishikk--virtualenv-python) "-m" "ishikk" "read"
+                ,@(when start-date
+                    `("--start-date" ,start-date))
+                ,@(when end-date
+                    `("--end-date" ,end-date))
+                ,(expand-file-name vdir)))
+     (user-error
+      "Failed to communicate with backend; see buffer %S for details"
+      ishikk-process-buffer))
+   (condition-case e
+       (let ((json-array-type 'list))
+         (json-read-from-string
+          (buffer-substring ishikk--output-start-marker
+                            ishikk--output-end-marker)))
+     (json-error
+      (unless (= (char-before) ?\n)
+        (insert "\n"))
+      (insert (format "[JSON decode error: %s]" (error-message-string e)))
       (user-error
-       "Failed to communicate with backend; see buffer %S for details"
-       ishikk-process-buffer))
-    (condition-case e
-        (json-read-from-string
-         (buffer-substring ishikk--output-start-marker
-                           ishikk--output-end-marker))
-      (json-error
-       (unless (= (char-before) ?\n)
-         (insert "\n"))
-       (insert (format "[JSON decode error: %s]" (error-message-string e)))
-       (user-error
-        "Failed to decode JSON from backend; see buffer %S for details"
-        ishikk-process-buffer)))))
+       "Failed to decode JSON from backend; see buffer %S for details"
+       ishikk-process-buffer)))))
 
 ;;;; Closing remarks
 
