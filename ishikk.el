@@ -146,10 +146,10 @@ returned."
      (json-error
       (unless (= (char-before) ?\n)
         (insert "\n"))
-      (insert (format "[JSON decode error: %s]" (error-message-string e)))
-      (user-error
-       "Failed to decode JSON from backend; see buffer %S for details"
-       ishikk-process-buffer)))))
+      (insert (format "[JSON decode error: %s]" (error-message-string e))))
+     (user-error
+      "Failed to decode JSON from backend; see buffer %S for details"
+      ishikk-process-buffer))))
 
 (defcustom ishikk-minutes-per-line 15
   "Number of minutes per line of text in the calendar.
