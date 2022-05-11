@@ -1,10 +1,10 @@
 ;;; ishikk.el --- Calendar for the weary fisher. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2018 Radon Rosborough
+;; Copyright (C) 2018-2022 Radian LLC <contact+ishikk@radian.codes>
 
-;; Author: Radon Rosborough <radon.neon@gmail.com>
+;; Author: Radian LLC <contact+ishikk@radian.codes>
 ;; Created: 12 Jun 2018
-;; Homepage: https://github.com/raxod502/ishikk
+;; Homepage: https://github.com/radian-software/ishikk
 ;; Keywords: calendar
 ;; Package-Requires: ((emacs "26"))
 ;; Version: 1.0
@@ -25,7 +25,7 @@
   "Calendar for the weary fisher."
   :prefix "ishikk-"
   :group 'applications
-  :link '(url-link :tag "GitHub" "https://github.com/raxod502/ishikk")
+  :link '(url-link :tag "GitHub" "https://github.com/radian-software/ishikk")
   :link '(emacs-commentary-link :tag "Commentary" "ishikk"))
 
 (defcustom ishikk-virtualenv-location
